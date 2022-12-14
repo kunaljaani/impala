@@ -1,0 +1,59 @@
+install.packages("ggExtra")
+
+Packages <- c("tidyverse", "rio", "here", "stringr", "scales", "ggrepel", "gghighlight", "gghighlight")
+install.packages(Packages)
+lapply(Packages, library, character.only = TRUE)
+
+library(pacman)
+library(ggExtra)
+
+pacman::p_load(
+  tidyverse,      # includes ggplot2 and other
+  rio,            # import/export
+  here,           # file locator
+  stringr,        # working with characters   
+  scales,         # transform numbers
+  ggrepel,        # smartly-placed labels
+  gghighlight,    # highlight one part of plot
+  gghighlight    # color scales
+)
+
+linelist <- rio::import("https://github.com/appliedepi/epirhandbook_eng/raw/master/data/case_linelists/linelist_cleaned.rds")
+# histogram - 
+ggplot(data = linelist, mapping = aes(x = age))+       # set data and axes
+  geom_histogram(              # display histogram
+    binwidth = 7,                # width of bins
+    color = "red",               # bin line color
+    fill = "lightblue")          # bin interior color (fill) 
+
+
+# Static color for points and for line
+ggplot(data = linelist, mapping = aes(x = age, y = wt_kg))+     
+  geom_point(color = "purple")+
+  geom_vline(xintercept = 50, color = "orange")+
+  labs(title = "Static color for points and line")
+
+# Color mapped to continuous column
+ggplot(data = linelist, mapping = aes(x = age, y = wt_kg))+     
+  geom_point(mapping = aes(color = temp))+         
+  labs(title = "Color mapped to continuous column")
+
+# Color mapped to discrete column
+ggplot(data = linelist, mapping = aes(x = age, y = wt_kg))+     
+  geom_point(mapping = aes(color = gender))+         
+  labs(title = "Color mapped to discrete column")
+
+# bar plot, fill to discrete column, color to static value
+ggplot(data = linelist, mapping = aes(x = hospital))+     
+  geom_bar(mapping = aes(fill = gender), color = "yellow")+         
+  labs(title = "Fill mapped to discrete column, static color")
+
+
+# Scatter plot, colored by outcome
+# Outcome column is assigned as color in ggplot. groupFill in ggMarginal set to TRUE
+scatter_plot_color <- ggplot(data = linelist %>% drop_na(gender))+
+  geom_point(mapping = aes(y = wt_kg, x = age, color = gender)) +
+  labs(title = "Scatter plot of weight and age")+
+  theme(legend.position = "bottom")
+
+ggMarginal(scatter_plot_color, type = "density", groupFill = TRUE)
